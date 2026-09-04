@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SitecoreContentTransfer (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SitecoreContentTransfer (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

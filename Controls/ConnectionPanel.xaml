@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SitecoreContentTransfer.Controls.ConnectionPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SitecoreContentTransfer.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:SitecoreContentTransfer.Models"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="12" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                BorderThickness="1" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+        <!-- Title -->
+        <TextBlock Text="{x:Bind Title, Mode=OneWay}" 
+                   Style="{StaticResource SubtitleTextBlockStyle}" 
+                   FontWeight="SemiBold"/>
+
+        <!-- Connection Type -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="Connection Type" FontWeight="SemiBold"/>
+            <RadioButtons SelectedIndex="{x:Bind ViewModel.ConnectionType, Mode=TwoWay, Converter={StaticResource EnumToIntConverter}}">
+                <RadioButton Content="Client Credentials" Tag="0"/>
+                <RadioButton Content="CLI user.json" Tag="1"/>
+            </RadioButtons>
+        </StackPanel>
+
+        <!-- Client Credentials Section -->
+        <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.ConnectionType, Mode=OneWay, Converter={StaticResource ConnectionTypeToVisibilityConverter}, ConverterParameter=ClientCredentials}">
+            <TextBox Header="Client ID" 
+                     Text="{x:Bind ViewModel.ClientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     PlaceholderText="Enter Client ID"/>
+
+            <PasswordBox Header="Client Secret" 
+                         Password="{x:Bind ViewModel.ClientSecret, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PlaceholderText="Enter Client Secret"/>
+        </StackPanel>
+
+        <!-- CLI user.json Section -->
+        <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.ConnectionType, Mode=OneWay, Converter={StaticResource ConnectionTypeToVisibilityConverter}, ConverterParameter=CliUserJson}">
+            <StackPanel>
+                <TextBlock Text="user.json Path" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{x:Bind ViewModel.UserJsonPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             PlaceholderText="Select user.json file"/>
+                    <Button Grid.Column="1" Content="Browse..." Command="{x:Bind ViewModel.BrowseUserJsonCommand}"/>
+                </Grid>
+            </StackPanel>
+
+            <ComboBox Header="Endpoint" 
+                      ItemsSource="{x:Bind ViewModel.AvailableEndpoints, Mode=OneWay}"
+                      SelectedItem="{x:Bind ViewModel.SelectedEndpoint, Mode=TwoWay}"
+                      PlaceholderText="Select endpoint"
+                      HorizontalAlignment="Stretch"
+                      IsEnabled="{x:Bind ViewModel.AvailableEndpoints.Count, Mode=OneWay, Converter={StaticResource HasItemsConverter}}"/>
+        </StackPanel>
+
+        <!-- Hostname (common) -->
+        <TextBox Header="Hostname (auto-detected or manual)" 
+                 Text="{x:Bind ViewModel.Hostname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 PlaceholderText="e.g., https://xmc-tenant.sitecorecloud.io"/>
+
+        <!-- Connection Status -->
+        <StackPanel Spacing="4">
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" 
+                        Content="Test Connection + Transfer Access" 
+                        Command="{x:Bind ViewModel.TestConnectionCommand}"
+                        IsEnabled="{x:Bind ViewModel.IsTesting, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"
+                        HorizontalAlignment="Left"/>
+
+                <ProgressRing Grid.Column="1" 
+                              IsActive="{x:Bind ViewModel.IsTesting, Mode=OneWay}" 
+                              Width="24" Height="24"
+                              Visibility="{x:Bind ViewModel.IsTesting, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            </Grid>
+
+            <TextBlock Text="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay}" 
+                       Foreground="{x:Bind ViewModel.IsConnectionValid, Mode=OneWay, Converter={StaticResource BoolToColorConverter}}"
+                       TextWrapping="Wrap"
+                       Visibility="{x:Bind ViewModel.ConnectionStatus, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>

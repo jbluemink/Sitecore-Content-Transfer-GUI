@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SitecoreContentTransfer.MainView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SitecoreContentTransfer"
+    xmlns:controls="using:SitecoreContentTransfer.Controls"
+    xmlns:converters="using:SitecoreContentTransfer.Converters"
+    xmlns:models="using:SitecoreContentTransfer.Models"
+    xmlns:viewmodels="using:SitecoreContentTransfer.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="Root">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="24" Spacing="24" MaxWidth="1200">
+
+            <!-- Header -->
+            <StackPanel Spacing="8">
+                <TextBlock Text="Sitecore Content Transfer" Style="{StaticResource TitleTextBlockStyle}"/>
+                <TextBlock Text="Transfer content between Sitecore environments" 
+                           Style="{StaticResource BodyTextBlockStyle}" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{x:Bind ViewModel.AppVersion, Mode=OneWay}"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="24">
+            <!-- Connection Configuration -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <controls:ConnectionPanel Grid.Column="0" 
+                                        Title="Source Connection"
+                                        ViewModel="{x:Bind ViewModel.SourceConnection, Mode=OneWay}"/>
+
+                <controls:ConnectionPanel Grid.Column="1" 
+                                        Title="Target Connection"
+                                        ViewModel="{x:Bind ViewModel.TargetConnection, Mode=OneWay}"/>
+            </Grid>
+
+            <!-- Transfer Configuration -->
+            <StackPanel Spacing="12" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                       BorderThickness="1" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                <TextBlock Text="Transfer Configuration" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
+
+                <!-- Database Selection -->
+                <ComboBox Header="Database" 
+                         ItemsSource="{x:Bind ViewModel.AvailableDatabases}"
+                         SelectedItem="{x:Bind ViewModel.Database, Mode=TwoWay}"
+                         Width="200"/>
+
+                <!-- Item Paths -->
+                <StackPanel Spacing="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Item Paths" FontWeight="SemiBold"/>
+                        <Button Grid.Column="1" Content="Add Path" Command="{x:Bind ViewModel.AddItemPathCommand}"/>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.ItemPaths, Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:TransferItemPathViewModel">
+                                <Grid ColumnSpacing="8" Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0" 
+                                            Text="{x:Bind Path, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            PlaceholderText="/sitecore/content/Home"/>
+
+                                    <ComboBox Grid.Column="1" 
+                                             SelectedIndex="{x:Bind Mode, Mode=TwoWay, Converter={StaticResource EnumToIntConverter}}"
+                                             HorizontalAlignment="Stretch">
+                                        <ComboBoxItem Content="Single Item"/>
+                                        <ComboBoxItem Content="Item And Descendants"/>
+                                    </ComboBox>
+
+                                    <Button Grid.Column="2" 
+                                           Content="Remove" 
+                                           Command="{Binding ViewModel.RemoveItemPathCommand, ElementName=Root}"
+                                           CommandParameter="{x:Bind}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Merge Strategy -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Merge Strategy" FontWeight="SemiBold"/>
+                    <RadioButtons SelectedIndex="{x:Bind ViewModel.MergeStrategy, Mode=TwoWay, Converter={StaticResource EnumToIntConverter}}">
+                        <RadioButton Content="Override Existing Item" Tag="0">
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Replace the existing item with the transferred version"/>
+                            </ToolTipService.ToolTip>
+                        </RadioButton>
+                        <RadioButton Content="Keep Existing Item" Tag="1">
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Leave the existing item unchanged"/>
+                            </ToolTipService.ToolTip>
+                        </RadioButton>
+                        <RadioButton Content="Override Existing Tree ⚠️" Tag="2">
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Remove the item and all its descendants from the destination, then write all items from the transfer. Use with caution!"/>
+                            </ToolTipService.ToolTip>
+                        </RadioButton>
+                    </RadioButtons>
+                </StackPanel>
+            </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="24">
+            <!-- Preset Management -->
+            <StackPanel Spacing="12" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                       BorderThickness="1" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                <TextBlock Text="Presets" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Column="0" 
+                             Header="Saved Presets"
+                             ItemsSource="{x:Bind ViewModel.Presets, Mode=OneWay}"
+                             SelectedItem="{x:Bind ViewModel.SelectedPreset, Mode=TwoWay}"
+                             DisplayMemberPath="Name"
+                             PlaceholderText="Select a preset"
+                             HorizontalAlignment="Stretch"/>
+
+                    <Button Grid.Column="1" Content="Load" Command="{x:Bind ViewModel.LoadPresetCommand}" VerticalAlignment="Bottom"/>
+                    <Button Grid.Column="2" Content="Delete" Command="{x:Bind ViewModel.DeletePresetCommand}" VerticalAlignment="Bottom"/>
+                </Grid>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" 
+                            Header="New Preset Name"
+                            Text="{x:Bind ViewModel.NewPresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            PlaceholderText="Enter preset name"/>
+
+                    <Button Grid.Column="1" Content="Save Current Config" Command="{x:Bind ViewModel.SavePresetCommand}" VerticalAlignment="Bottom"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Transfer Execution -->
+            <StackPanel Spacing="12" Padding="16" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                       BorderThickness="1" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                <TextBlock Text="Transfer Execution" Style="{StaticResource SubtitleTextBlockStyle}" FontWeight="SemiBold"/>
+
+                <CheckBox Content="Debug logging"
+                          IsChecked="{x:Bind ViewModel.IsDebugLoggingEnabled, Mode=TwoWay}"
+                          ToolTipService.ToolTip="Log endpoint details, masked token info and API response diagnostics"/>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                           Content="Start Transfer" 
+                           Command="{x:Bind ViewModel.StartTransferCommand}"
+                           IsEnabled="{x:Bind ViewModel.IsTransferring, Mode=OneWay, Converter={StaticResource InverseBoolConverter}}"
+                           Style="{StaticResource AccentButtonStyle}"
+                           HorizontalAlignment="Left"/>
+
+                    <Button Grid.Column="1"
+                           Content="Clear"
+                           Command="{x:Bind ViewModel.ClearTransferLogCommand}"
+                           HorizontalAlignment="Left"/>
+                </Grid>
+
+                <ProgressBar Value="{x:Bind ViewModel.TransferProgress, Mode=OneWay}" 
+                            Maximum="100"
+                            Visibility="{x:Bind ViewModel.IsTransferring, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <TextBox x:Name="TransferLogTextBox"
+                        Header="Transfer Log" 
+                        Text="{x:Bind ViewModel.TransferLog, Mode=OneWay}"
+                        TextChanged="TransferLogTextBox_OnTextChanged"
+                        IsReadOnly="True"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        Height="300"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        FontFamily="Consolas"/>
+            </StackPanel>
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
