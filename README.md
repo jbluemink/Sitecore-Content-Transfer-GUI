@@ -6,6 +6,8 @@ It is built for developers, technical content teams, and administrators who need
 
 This tool uses the Content Transfer API without environment limitations, supports local Docker containers, and enables transfers between different organizations.
 
+See [Using the Sitecore Content Transfer API Locally with Docker](https://stockpick.nl/sitecoreai/sitecore-content-transfer-api-locally-with-docker/) for how to fix local SitecoreAI for Content Transfer API
+
 ## Security note
 
 This is a development tool. Please note that API keys/client secrets are currently stored in plain text in the local app configuration.
