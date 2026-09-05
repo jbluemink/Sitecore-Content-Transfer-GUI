@@ -1,6 +1,6 @@
 # Sitecore Content Transfer GUI
 
-A .NET/C# Windows executable for Sitecore AI
+A .NET/C# Windows executable for SitecoreAI
 
 It is built for developers, technical content teams, and administrators who need a fast way to transfer content without hassle, and to set up and explore the Sitecore AI Content Transfer API and Item Transfer API.
 
